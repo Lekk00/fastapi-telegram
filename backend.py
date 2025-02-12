@@ -1,36 +1,37 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from telethon import TelegramClient
 import os
 
 app = FastAPI()
 
-# Telegram API Bilgileri (BOT TOKEN KULLANMA!)
-API_ID = "13676960"  # Telegram'dan aldığın API ID
-API_HASH = "e7711d9390f24907101c4018011e2da7"  # Telegram'dan aldığın API Hash
-PHONE_NUMBER = "+905550564025"  # Kendi Telegram numaranı gir
+router = APIRouter()
 
-# Telegram Client Bağlantısı
+# Telegram API Bilgileri
+API_ID = os.getenv("13676960", "")
+API_HASH = os.getenv("e7711d9390f24907101c4018011e2da7", "")
+PHONE_NUMBER = os.getenv("+905550564025", "")
+
 client = TelegramClient("session_name", API_ID, API_HASH)
 
 @app.on_event("startup")
 async def startup_event():
-    """FastAPI başlatıldığında Telegram istemcisini başlatır."""
+    """FastAPI başlatıldığında Telegram istemcisini başlat."""
     await client.start(PHONE_NUMBER)
     print("✅ Telegram Client Bağlandı!")
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    """FastAPI kapanırken Telegram istemcisini kapatır."""
+    """FastAPI kapatılırken Telegram istemcisini kapat."""
     await client.disconnect()
     print("❌ Telegram Client Bağlantısı Kesildi!")
 
-@app.get("/")
+@router.get("/")
 async def home():
-    return {"message": "FastAPI ve Telegram Kullanıcı Hesabı ile Entegre Edildi 🚀"}
+    return {"message": "FastAPI Backend çalışıyor 🚀"}
 
-@app.get("/get-channels")
+@router.get("/get-channels")
 async def get_channels():
-    """Botun katıldığı tüm kanalları listeler ve hata mesajlarını yakalar."""
+    """Botun katıldığı tüm kanalları listeler ve hata mesajları yakalar."""
     try:
         if not client.is_connected():
             await client.connect()
@@ -40,13 +41,14 @@ async def get_channels():
         return {"channels": channels}
 
     except Exception as e:
-        print(f"⚠️ HATA: {str(e)}")  # Terminalde hatayı gör
+        print(f"⚠ HATA: {str(e)}")  # Terminalde hatayı göster
         return {"error": str(e)}  # API yanıtında hatayı göster
 
-import os
+app.include_router(router)
+
 import uvicorn
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))  # Render'ın verdiği portu al, yoksa 10000 kullan
+    port = int(os.environ.get("PORT", 10000))  # Render'ın verdiği portu al
+    print(f"🚀 Server is running on port {port}")
     uvicorn.run(app, host="0.0.0.0", port=port)
-
