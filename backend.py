@@ -43,3 +43,7 @@ async def get_channels():
         print(f"⚠️ HATA: {str(e)}")  # Terminalde hatayı gör
         return {"error": str(e)}  # API yanıtında hatayı göster
 
+import uvicorn
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=10000)
