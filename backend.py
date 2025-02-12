@@ -4,9 +4,10 @@ import os
 
 app = FastAPI()
 
+# API Router kullanımı
 router = APIRouter()
 
-# Telegram API Bilgileri
+# Telegram API Bilgileri (Çevresel değişkenler)
 API_ID = os.getenv("13676960", "")
 API_HASH = os.getenv("e7711d9390f24907101c4018011e2da7", "")
 PHONE_NUMBER = os.getenv("+905550564025", "")
@@ -29,9 +30,9 @@ async def shutdown_event():
 async def home():
     return {"message": "FastAPI Backend çalışıyor 🚀"}
 
-@router.get("/get-channels")
+@router.get("/get-channels", tags=["channels"])
 async def get_channels():
-    """Botun katıldığı tüm kanalları listeler ve hata mesajları yakalar."""
+    """Botun katıldığı tüm kanalları listeler ve hata mesajlarını yakalar."""
     try:
         if not client.is_connected():
             await client.connect()
@@ -44,6 +45,7 @@ async def get_channels():
         print(f"⚠ HATA: {str(e)}")  # Terminalde hatayı göster
         return {"error": str(e)}  # API yanıtında hatayı göster
 
+# API Router'ı FastAPI uygulamasına ekleyelim
 app.include_router(router)
 
 import uvicorn
